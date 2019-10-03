@@ -1,5 +1,3 @@
-# SICP_answers
-
 #charpter 1
 * exercise 1.6
 <pre>
@@ -128,7 +126,8 @@
 (g 3)
 (f 3)
 </pre>
-* exercise 1.15
+* exercise 
+* 
 <pre>
 (define (cube x) (* x x x))
 (define (p x) (- (* 3 x) (* 4 (cube x))))
@@ -261,4 +260,283 @@
         ((fermat-test n)(fast-prime? n (- times 1)))
         (else false)))
 </pre>
-* exercise 1.21
+* exercise 1.22
+<pre>
+(define (runtime)(current-milliseconds))
+(define (smallest-divisor n)
+  (define (square x)(* x x))
+  (define (divides? a b)(= (remainder b a) 0))
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (+ test-divisor 1)))))
+  (find-divisor n 2))
+(define (prime n)
+  (= (smallest-divisor n) n))
+
+(define (time-prime-test n)
+    
+  (define (report-prime elapsed-time)
+    (display "* * *")
+    (display elapsed-time))
+  (define (start-prime-test n start-time)
+    (if (prime n)
+        (report-prime (- (runtime) start-time))
+        (display "Not a Prime")))
+  (newline)
+  (display n)
+  (start-prime-test n (runtime)))
+</pre>
+
+* exercise 1.22-own
+<pre>
+(define (runtime)(current-milliseconds))
+(define (smallest-divisor n)
+  (define (square x)(* x x))
+  (define (divides? a b)(= (remainder b a) 0))
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (+ test-divisor 1)))))
+  (find-divisor n 2))
+(define (prime n)
+  (= (smallest-divisor n) n))
+
+(define (search-3-prime n)
+  (define (p n time)
+    (if (prime n) (display n) (display ""))
+    (if (prime n) (display " " ) (display ""))
+    (if (prime n) (display (- (runtime) time))(display ""))
+    (if (prime n) (display "\n") (display ""))
+    (prime n))
+  (define (f n count time_int)
+    (if (= count 3) (display "over\n")
+        (if (p n time_int)
+            (f (+ n 2) (+ count 1) (runtime))
+            (f (+ n 2) count (runtime)))))
+  (f (+ n 1) 0 (runtime)))
+
+</pre>
+* exercise 1.29
+<pre>
+(define (sum term next a b)
+  {if (> a b)
+      0
+      (+ (term a)
+         (sum term next (next a) b))})
+(define (inc a) (+ a 1))
+(define (cube a) (* a a a))
+(define (int a) a)
+(define (sum-cub a b)
+  (sum cube inc a b))
+
+(define (intergal f a b dx)
+  (define (add-dx x)(+ x dx))
+  (* dx (sum f add-dx (+ a (/ dx 2.0)) b)))
+
+(define (simpson term a b n)
+  (define h (/ (- b a) n))
+  (define (y k)(*(term (+ a (* h k)))
+                 (cond ((or(= k 0)(= k 1)) 1)
+                       ((= 0 (remainder k 2)) 2)
+                       ((= 1 (remainder k 2)) 4))))
+  (* (/ h 3)
+     (sum y inc 0 n)))
+</pre>
+* exercise 1.30
+<pre>
+(define (new-sum term next a b)
+  (define (iter a result)
+    (if(> a b)
+       result
+       (iter  (next a) (+ (term a) result))))
+  (iter a 0))
+</pre>
+
+* exercise 1.31
+<pre>
+(define (accumul f next a b )
+  (if (> a b)
+      1
+      (* (f a)
+         (accumul f next (next a) b))))
+(define (p a)(- 1 (/ 1(* a a))))
+(define (add-a a) (+ a 2))
+(define (pi b)
+  (* 4 (accumul p add-a 3 b)))
+</pre>
+* exercise 1.32
+<pre>
+(define (accumul f next a b )
+  (if (> a b)
+      1
+      (* (f a)
+         (accumul f next (next a) b))))
+(define (p a)(- 1 (/ 1(* a a))))
+(define (add-a a) (+ a 2))
+(define (pi b)
+  (* 4 (accumul p add-a 3 b)))
+</pre>
+* exercise 1.33
+<pre>
+	a) 递归
+<pre>
+(define (accumulate null-value conbine f next a b)
+  (if (> a b)
+      null-value
+      (conbine (f a)
+               (accumulate null-value conbine f next (next a) b))))
+</pre>
+	b) 迭代
+<pre>
+(define (accumulate-iter null-value conbine f next a b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (conbine result
+                                (f a)))))
+  (iter a null-value))
+</pre>
+</pre>
+
+* exercise 1.35
+<pre>
+(define (fixed-point f guess)
+  (define (abs a)(if (> a 0) a (- 0 a)))
+  (define (close-enough? a b)(< (abs (- (f guess) guess)) 0.00001))
+  (if (close-enough? guess (f guess))
+      guess
+      (fixed-point f (f guess))))
+(fixed-point (lambda (x) (+ 1 (/ 1 x))) 2)
+</pre>
+* exercise 1.36
+<pre>
+(define (fixed-point f guess)
+  (define (abs a)(if (> a 0) a (- 0 a)))
+  (define (close-enough? a b)(< (abs (- (f guess) guess)) 0.00001))
+  (cond((close-enough? guess (f guess)) guess)
+       (else (display guess)
+             (newline)
+             (fixed-point f (f guess)))))
+(fixed-point (lambda (x) (/ (log 1000) (log x))) 2.0)
+(define (average a b) (/ (+ a b) 2))
+(fixed-point (lambda(x) (average x ((lambda (x) (/ (log 1000) (log x))) x))) 2.0)
+</pre>
+* exercise 1.37
+<pre>
+	a) 递归
+<pre>
+(define (cont-frac n d k)
+  (define (f i)
+    (if (= i k)
+        (/(n i) (d i))
+        (/(n i)
+          (+ (d i)
+             (f (+ i 1))))))
+  (f 1))
+</pre>
+	b) 迭代
+<pre>
+(define (cont n d k)
+  (define (iter i res)
+    (cond ((= i k)
+           (iter (- i 1) (+ res (/ (n i) (d i)))))
+          ((= i 0) res)
+          ((< i k)
+           (iter (- i 1) (/ (n i) (+ res (d i)))))))
+  (iter k 0))
+</pre>
+</pre>
+* exercise 1.38
+<pre>
+(define (cont n d k)
+  (define (iter i res)
+    (cond ((= i k)
+           (iter (- i 1) (+ res (/ (n i) (d i)))))
+          ((= i 0) res)
+          ((< i k)
+           (iter (- i 1) (/ (n i) (+ res (d i)))))))
+  (iter k 0))
+(+ (cont (lambda(x) 1.0) (lambda(x) (if (= 0 (remainder (+ x 1) 3)) (* 2 (/ (+ x 1) 3)) 1.0)) 10) 2)
+</pre>
+* exercise 1.40
+<pre>
+(define (cubic a b c)
+  (lambda(x)(+ (* x x x)
+               (* a x x)
+               (* b x)
+               c)))
+(newton-method (cubic 1 2 3) 1)
+</pre>
+* exercise 1.42
+<pre>
+(define (compose f g)
+  (lambda(x) (f (g x))))
+</pre>
+* exercise 1.43
+<pre>
+(define (duplicate f n)
+  (define (int i) i)
+  (define (iter i res)
+    (if (> i n)
+        res
+        (iter (+ i 1)(lambda(x) (f (res x))))))
+  (iter 1 int))
+</pre>
+* exercise 1.44
+<pre>
+(define (compose f g)
+  (lambda(x) (f (g x))))
+(define (duplicate f n)
+  (define (int i) i)
+  (define (iter i res)
+    (if (> i n)
+        res
+        (iter (+ i 1)(lambda(x) (f (res x))))))
+  (iter 1 int))
+
+(define (smooth f dx)
+  (lambda(x)
+    (/ (+ (f x)
+          (f (+ x dx))
+          (f (- x dx)))
+       3)))
+
+(define (iter-smooth f dx n)
+  (duplicate (smooth f dx) n))
+</pre>
+* exercise 1.45
+<pre>
+(define (average-damp f)
+  (lambda(x) (average x (f x))))
+
+(define (pow x n)
+  (define (iter i res)
+    (if (> i n)
+        res
+        (iter (+ i 1) (* x res))))
+  (iter 1 1))
+
+(define(damped-n-times f n)
+  ((duplicate average-damp n) f))
+(define (square x) (* x x))
+((damped-n-times square 10) 10.0)
+(define (n-sqrt-root n x)
+  (fixed-point (damped-n-times
+                (lambda(y) (/ x
+                             (pow y (- n 1))))
+                n) 1.0))
+</pre>
+* exercise 1.46
+<pre>
+(define (iterative-improve close-enough? improve)
+    (lambda (first-guess)
+        (define (try guess)
+            (let ((next (improve guess)))
+                (if (close-enough? guess next)
+                    next
+                    (try next))))
+        (try first-guess)))
+(define (new-fixed-point f guess)
+  ((iterative-improve (lambda(x y)(< (abs (- x y)) 0.0001))(lambda(x)(f x)))guess))
+</pre>
